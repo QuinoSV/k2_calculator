@@ -14,16 +14,24 @@ class CalcDisplay(ttk.Frame):
         self.pack_propagate(0)
 
         s = ttk.Style()
-        #s.theme_use("alt") Solo en Mac
-        s.configure("my.TLabel", font="Helvetica 40")
+        s.theme_use("alt")
+        s.configure("my.TLabel", font="Helvetica 32")
 
         self.lblDisplay = ttk.Label(self, text=self._value, style="my.TLabel", anchor=E, foreground="white", background="black")
         self.lblDisplay.pack(fill=BOTH, expand= True)
     
     def addDigit(self, digito):
-        if len(self._value) == 10:
+        if self._value[0] != "-" and len(self._value) >= 10 or len(self._value) >= 11:
             return
-        
+        '''
+        if self._value[0]:
+            longmax = 11
+        else:
+            longmax = 10
+
+        if len(self._value) == longmax:
+            return
+        '''
         if self._value == "0":
             self._value = digito
         else: 
@@ -32,11 +40,14 @@ class CalcDisplay(ttk.Frame):
         self.pintar()
 
     def pintar(self):
-        self.lblDisplay.configure(text=value)
+        self.lblDisplay.configure(text=self._value)
 
     def reset(self):
-        self_value = "0"
+        self._value = "0"
         self._espositivo = True
+        self._op1 = "0"
+        self._op2 = "0"
+        self.resultado = None
         self.pintar()
 
     def signo(self):
@@ -78,21 +89,21 @@ class Calculator(ttk.Frame):
         self.display = CalcDisplay(self)
         self.display.grid(column=0, row=0, columnspan=4)
         CalcButton(self, text='C', command=self.display.reset).grid(column=0, row=1)
-        CalcButton(self, text='+/-', command=None).grid(column=1, row=1)
+        CalcButton(self, text='+/-', command=self.display.signo).grid(column=1, row=1)
         CalcButton(self, text='%', command=None).grid(column=2, row=1)
-        CalcButton(self, text='÷', command=self.display.signo).grid(column=3, row=1)
+        CalcButton(self, text='÷', command=lambda: self.opera('/')).grid(column=3, row=1)
         CalcButton(self, text='7', command=lambda: self.display.addDigit('7')).grid(column=0, row=2)
         CalcButton(self, text='8', command=lambda: self.display.addDigit('8')).grid(column=1, row=2)
         CalcButton(self, text='9', command=lambda: self.display.addDigit('9')).grid(column=2, row=2)
-        CalcButton(self, text='x', command=None).grid(column=3, row=2)
+        CalcButton(self, text='x', command=lambda: self.opera('*')).grid(column=3, row=2)
         CalcButton(self, text='4', command=lambda: self.display.addDigit('4')).grid(column=0, row=3)
         CalcButton(self, text='5', command=lambda: self.display.addDigit('5')).grid(column=1, row=3)
         CalcButton(self, text='6', command=lambda: self.display.addDigit('6')).grid(column=2, row=3)
-        CalcButton(self, text='-', command=None).grid(column=3, row=3)
+        CalcButton(self, text='-', command=lambda: self.opera('-')).grid(column=3, row=3)
         CalcButton(self, text='1', command=lambda: self.display.addDigit('1')).grid(column=0, row=4)
         CalcButton(self, text='2', command=lambda: self.display.addDigit('2')).grid(column=1, row=4)
         CalcButton(self, text='3', command=lambda: self.display.addDigit('3')).grid(column=2, row=4)
-        CalcButton(self, text='+', command=lambda: self.display.opera("+")).grid(column=3, row=4)
+        CalcButton(self, text='+', command=lambda: self.opera('+')).grid(column=3, row=4)
         CalcButton(self, text='0', command=lambda: self.display.addDigit('0'), bw=2).grid(column=0, row=5, columnspan=2)
         CalcButton(self, text=",", command=None).grid(column=2, row=5)
         CalcButton(self, text="=", command=None).grid(column=3, row=5)
@@ -102,9 +113,9 @@ class Calculator(ttk.Frame):
         if self._op1 is None:
             self._op1 = float(self.display._value)
             self._operador = operador
-            self.display.reset()    
+            self.display.reset()
         else:
-            self._op2 = float(self.display_value)
+            self._op2 = float(self.display._value)
             if self._operador == "+":
                 resultado = self._op1 + self._op2
             elif self._operador == "-":
@@ -113,12 +124,16 @@ class Calculator(ttk.Frame):
                 resultado = self._op1 * self._op2
             else:
                 resultado = self._op1 / self._op2
-            
+
+            self.display._value = resultado
+            self.display.pintar()   
             self._op1 = resultado
             self._operador = operador
             resultado = str(resultado)
-            self.display._value = resultado
-            self.display.pintar()
+            
+            
+        
+    
 
 
 
