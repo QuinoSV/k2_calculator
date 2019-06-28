@@ -116,7 +116,7 @@ class Calculator(ttk.Frame):
         CalcButton(self, text="=", command=lambda: self.opera('=')).grid(column=3, row=5)
 
     def addDigit(self, digito):
-        if self._operador != None:
+        if self._swBorrado:
             self.display.reset()
             self._swBorrado = False
 
